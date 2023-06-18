@@ -22,7 +22,7 @@ const initializeDbAndServer = async () => {
       driver: sqlite3.Database,
     });
 
-    app.listen(3004, () =>
+    app.listen(process.env.PORT || 3004, () =>
       console.log("Server Running at http://localhost:3004/")
     );
   } catch (error) {
@@ -99,7 +99,7 @@ app.post("/login", async (request, response) => {
   
   if (databaseUser === undefined) {
     response.status(400);
-    response.send("Invalid user");
+    response.send({"error_msg":"Invalid user"});
   } else {
     const isPasswordMatched = await bcrypt.compare(
       password,
@@ -113,7 +113,7 @@ app.post("/login", async (request, response) => {
       response.send({ jwt_token });
     } else {
       response.status(400);
-      response.send("Invalid password");
+      response.send({"error_msg":"Invalid password"});
     }
   }
 });
@@ -160,7 +160,6 @@ app.put("/change-password", async (request, response) => {
 
 
 app.get("/prime-deals/", authenticateToken, async (request, response) => {
-  
   const getPrimeDealsQuery = `
     SELECT
       *
@@ -243,6 +242,7 @@ app.get("/products/:productId/", authenticateToken, async (request, response) =>
   response.send({product:product,similar_products:products});
 });
 
+
 app.get("/cart", authenticateToken, async (request, response) => {
   const { username } = request;
   const getCartItemsQuery = `
@@ -324,6 +324,3 @@ app.put("/cart/update", authenticateToken, async (request, response) => {
   await database.run(updateQuantityQuery);
   response.send("Item quantity updated in the cart");
 });
-
-
-
